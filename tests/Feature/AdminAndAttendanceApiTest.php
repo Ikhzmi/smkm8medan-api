@@ -56,6 +56,17 @@ test('admin analytics aggregates events in the database and limits latest logins
     expect($queries->contains(fn (string $query): bool => str_contains($query, 'select * from "login_events"') && ! str_contains($query, 'limit')))->toBeFalse();
 });
 
+test('unauthenticated API requests return JSON 401 without a login redirect', function () {
+    $this->post('/api/v1/guru/attendance')
+        ->assertUnauthorized()
+        ->assertHeader('Content-Type', 'application/json')
+        ->assertExactJson(['message' => 'Unauthenticated.']);
+
+    $this->postJson('/api/v1/guru/attendance')
+        ->assertUnauthorized()
+        ->assertExactJson(['message' => 'Unauthenticated.']);
+});
+
 test('admin can manage majors and receive attendance summary', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     Sanctum::actingAs($admin);
