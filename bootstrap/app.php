@@ -15,14 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectGuestsTo(null);
         $middleware->alias([
             'role' => EnsureRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(
-            AuthenticationException::class,
-            static fn () => response()->json(['message' => 'Unauthenticated.'], 401),
+            static fn (AuthenticationException $exception) => response()->json(['message' => 'Unauthenticated.'], 401),
         );
 
         $exceptions->shouldRenderJsonWhen(
